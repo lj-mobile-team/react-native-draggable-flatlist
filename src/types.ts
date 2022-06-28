@@ -30,8 +30,11 @@ export type DraggableFlatListProps<T> = Modify<
     autoscrollThreshold?: number;
     containerStyle?: StyleProp<ViewStyle>;
     debug?: boolean;
+    deleteItem: (key: string) => void;
     dragItemOverflow?: boolean;
+    hoverComponentStyle?: object;
     keyExtractor: (item: T, index: number) => string;
+    localization?: any;
     onDragBegin?: (index: number) => void;
     onDragEnd?: (params: DragEndParams<T>) => void;
     onPlaceholderIndexChange?: (placeholderIndex: number) => void;
@@ -39,6 +42,8 @@ export type DraggableFlatListProps<T> = Modify<
     onScrollOffsetChange?: (scrollOffset: number) => void;
     renderItem: RenderItem<T>;
     renderPlaceholder?: RenderPlaceholder<T>;
+    screenHeight: number;
+    scrollEventThrottle: number;
     simultaneousHandlers?: React.Ref<any> | React.Ref<any>[];
     outerScrollOffset?: Animated.SharedValue<number>;
     onAnimValInit?: (animVals: ReturnType<typeof useAnimatedValues>) => void;

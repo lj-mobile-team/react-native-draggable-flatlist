@@ -104,7 +104,7 @@ function useSetupAnimatedValues<T>() {
       containerSize.value - activeCellSize.value + scrollOffset.value;
 
     const constrained = Math.min(
-      containerMinusActiveCell,
+      containerMinusActiveCell * 2,
       Math.max(
         scrollOffset.value,
         touchPositionDiff.value + activeCellOffset.value

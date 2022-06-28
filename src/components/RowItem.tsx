@@ -12,6 +12,10 @@ type Props<T> = {
   renderItem: RenderItem<T>;
   itemKey: string;
   debug?: boolean;
+  horizontal?: any;
+  deleteItem?: (key: string)=>void;
+  localization?: any;
+  screenHeight?: number
 };
 
 function RowItem<T>(props: Props<T>) {
