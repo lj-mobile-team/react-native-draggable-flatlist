@@ -1,9 +1,14 @@
 import React, { useCallback, useLayoutEffect, useMemo, useState } from "react";
-import { ListRenderItem, FlatListProps, LayoutChangeEvent, View,
+import {
+  ListRenderItem,
+  FlatListProps,
+  LayoutChangeEvent,
+  View,
   Animated as RNAnimated,
   Easing as RNEasing,
   Alert,
-  Dimensions } from "react-native";
+  Dimensions,
+} from "react-native";
 import {
   FlatList,
   Gesture,
@@ -18,7 +23,7 @@ import Animated, {
   interpolateNode,
   Extrapolate,
   EasingNode as Easing,
-  multiply
+  multiply,
 } from "react-native-reanimated";
 import CellRendererComponent from "./CellRendererComponent";
 import { DEFAULT_PROPS, isWeb } from "../constants";
@@ -36,7 +41,7 @@ import { useStableCallback } from "../hooks/useStableCallback";
 import ScrollOffsetListener from "./ScrollOffsetListener";
 import { typedMemo } from "../utils";
 
-const {height, width} = Dimensions.get("screen");
+const { height, width } = Dimensions.get("screen");
 
 type RNGHFlatListProps<T> = Animated.AnimateProps<
   FlatListProps<T> & {
@@ -116,8 +121,9 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
       activeCellOffset.value = cellData.measurements.offset;
       activeCellSize.value = cellData.measurements.size;
     }
-    
+
     startTimingAnimation();
+
     const { onDragBegin } = propsRef.current;
     if (index !== undefined) {
       spacerIndexAnim.value = index;
@@ -130,33 +136,27 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
   let scale = new Animated.Value<number>(0);
   let lastTimingAnimation = "";
 
-  const startTimingAnimation = useCallback(()=>{
-
-    if(lastTimingAnimation !== 'start'){
-      lastTimingAnimation = 'start';
+  const startTimingAnimation = useCallback(() => {
+    if (lastTimingAnimation !== "start") {
+      lastTimingAnimation = "start";
 
       Animated.timing(scale, {
         duration: 500,
         toValue: 1,
-        easing: Easing.bounce
-      }).start()
-
-
+        easing: Easing.bounce,
+      }).start();
     }
-
   }, [lastTimingAnimation]);
 
-  const endTimingAnimation = useCallback(()=>{
-
-    if(lastTimingAnimation !== 'end'){
-      lastTimingAnimation = 'end';
+  const endTimingAnimation = useCallback(() => {
+    if (lastTimingAnimation !== "end") {
+      lastTimingAnimation = "end";
       Animated.timing(scale, {
         duration: 500,
         toValue: 0,
-        easing: Easing.bounce
-      }).start()
+        easing: Easing.bounce,
+      }).start();
     }
-
   }, [lastTimingAnimation]);
 
   const onContainerLayout = ({
@@ -204,7 +204,7 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
         horizontal,
         deleteItem,
         screenHeight,
-        localization
+        localization,
       } = props;
 
       return (
@@ -218,6 +218,10 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
           deleteItem={deleteItem}
           localization={localization}
           screenHeight={screenHeight}
+          itemProp={item}
+          panGesture={panGesture}
+          //@ts-ignore
+          activeIndex={activeIndexAnim}
         />
       );
     },
@@ -295,7 +299,6 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
 
       touchTranslate.value = translation + autoScrollDistance.value;
       panGestureState.value = evt.state;
-
       // Only call onDragEnd if actually dragging a cell
       if (activeIndexAnim.value === -1 || disabled.value) return;
       disabled.value = true;

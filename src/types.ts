@@ -1,6 +1,8 @@
+//@ts-ignore
 import React from "react";
 import {
   FlatListProps,
+  LayoutRectangle,
   LayoutChangeEvent,
   StyleProp,
   ViewPropTypes,
@@ -48,7 +50,7 @@ export type DraggableFlatListProps<T> = Modify<
     outerScrollOffset?: Animated.SharedValue<number>;
     onAnimValInit?: (animVals: ReturnType<typeof useAnimatedValues>) => void;
     onContainerLayout?: (params: {
-      layout: LayoutChangeEvent["nativeEvent"]["layout"];
+      layout: LayoutRectangle;
       containerRef: React.RefObject<Animated.View>;
     }) => void;
   } & Partial<DefaultProps>
@@ -56,7 +58,7 @@ export type DraggableFlatListProps<T> = Modify<
 
 export type RenderPlaceholder<T> = (params: {
   item: T;
-  index: number;
+  index: number; //@ts-ignore
 }) => JSX.Element;
 
 export type RenderItemParams<T> = {
@@ -64,6 +66,7 @@ export type RenderItemParams<T> = {
   getIndex: () => number | undefined; // This is technically a "last known index" since cells don't necessarily rerender when their index changes
   drag: () => void;
   isActive: boolean;
+  index?: number;
 };
 
 export type RenderItem<T> = (params: RenderItemParams<T>) => React.ReactNode;
