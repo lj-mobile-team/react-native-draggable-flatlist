@@ -166,12 +166,14 @@ function RowItem<T>(props: Props<T>) {
   );
 
   const _moveY = useStableCallback(({ dragY }: { dragY: number }) => {
-    RNAnimated.timing(_dragY, {
-      duration: 1,
-      toValue: dragY,
-      easing: RNEasing.linear,
-      useNativeDriver: true,
-    }).start(() => {});
+    if (getIndex()) {
+      RNAnimated.timing(_dragY, {
+        duration: 1,
+        toValue: dragY,
+        easing: RNEasing.linear,
+        useNativeDriver: true,
+      }).start(() => {});
+    }
   });
 
   const itemPanGesture = Gesture.Pan()
