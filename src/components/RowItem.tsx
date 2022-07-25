@@ -181,7 +181,9 @@ function RowItem<T>(props: Props<T>) {
     .activeOffsetY([-50, 50])
     .simultaneousWithExternalGesture(props.panGesture)
     .onEnd((event) => {
-      runOnJS(_toogleSnapAnimate)({ isDelete: event.translationY <= -200 });
+      runOnJS(_toogleSnapAnimate)({
+        isDelete: event.translationY <= -200 && !!getIndex(),
+      });
     })
     .onUpdate((event) => {
       runOnJS(_moveY)({ dragY: event.translationY });
