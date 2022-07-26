@@ -40,6 +40,7 @@ import { useAutoScroll } from "../hooks/useAutoScroll";
 import { useStableCallback } from "../hooks/useStableCallback";
 import ScrollOffsetListener from "./ScrollOffsetListener";
 import { typedMemo } from "../utils";
+import {ScaleDecorator} from "./CellDecorators";
 
 const { height, width } = Dimensions.get("screen");
 
@@ -122,7 +123,7 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
       activeCellSize.value = cellData.measurements.size;
     }
 
-    startTimingAnimation();
+    // startTimingAnimation();
 
     const { onDragBegin } = propsRef.current;
     if (index !== undefined) {
@@ -133,31 +134,32 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
     }
   });
 
-  let scale = new Animated.Value<number>(0);
-  let lastTimingAnimation = "";
+  // let scale = new Animated.Value<number>(0);
+  // let lastTimingAnimation = "";
 
-  const startTimingAnimation = useCallback(() => {
-    if (lastTimingAnimation !== "start") {
-      lastTimingAnimation = "start";
+  // const startTimingAnimation = useCallback(() => {
+  //   if (lastTimingAnimation !== "start") {
+  //     lastTimingAnimation = "start";
+  //     console.log('STARTING DRAG!!!');
+  //     Animated.timing(scale, {
+  //       duration: 500,
+  //       toValue: 1,
+  //       easing: Easing.bounce,
+  //     }).start();
+  //   }
+  // }, []);
 
-      Animated.timing(scale, {
-        duration: 500,
-        toValue: 1,
-        easing: Easing.bounce,
-      }).start();
-    }
-  }, [lastTimingAnimation]);
-
-  const endTimingAnimation = useCallback(() => {
-    if (lastTimingAnimation !== "end") {
-      lastTimingAnimation = "end";
-      Animated.timing(scale, {
-        duration: 500,
-        toValue: 0,
-        easing: Easing.bounce,
-      }).start();
-    }
-  }, [lastTimingAnimation]);
+  // const endTimingAnimation = useCallback(() => {
+  //   if (lastTimingAnimation !== "end") {
+  //     lastTimingAnimation = "end";
+  //     console.log('ENDING DRAG!!!');
+  //     Animated.timing(scale, {
+  //       duration: 500,
+  //       toValue: 0,
+  //       easing: Easing.bounce,
+  //     }).start();
+  //   }
+  // }, []);
 
   const onContainerLayout = ({
     nativeEvent: { layout },
@@ -180,7 +182,7 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
   };
 
   const onContainerTouchEnd = () => {
-    endTimingAnimation();
+    // endTimingAnimation();
     isTouchActiveNative.value = false;
   };
 
@@ -207,22 +209,25 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
         localization,
       } = props;
 
+ 
       return (
-        <RowItem
-          item={item}
-          itemKey={key}
-          renderItem={props.renderItem}
-          drag={drag}
-          extraData={props.extraData}
-          horizontal={horizontal}
-          deleteItem={deleteItem}
-          localization={localization}
-          screenHeight={screenHeight}
-          itemProp={item}
-          panGesture={panGesture}
-          //@ts-ignore
-          activeIndex={activeIndexAnim}
-        />
+        <ScaleDecorator activeScale={1.1}>
+          <RowItem
+            item={item}
+            itemKey={key}
+            renderItem={props.renderItem}
+            drag={drag}
+            extraData={props.extraData}
+            horizontal={horizontal}
+            deleteItem={deleteItem}
+            localization={localization}
+            screenHeight={screenHeight}
+            itemProp={item}
+            panGesture={panGesture}
+            //@ts-ignore
+            activeIndex={activeIndexAnim}
+          />
+       </ScaleDecorator>
       );
     },
     [props.renderItem, props.extraData, drag, keyExtractor]
