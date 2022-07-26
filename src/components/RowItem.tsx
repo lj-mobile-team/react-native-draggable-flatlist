@@ -162,7 +162,7 @@ function RowItem<T>(props: Props<T>) {
 
   const itemPanGesture = Gesture.Pan()
     .enabled( !!getIndex() && enabled )
-    .activeOffsetY([-1, 1])
+    .activeOffsetY([-10, 10])
     .simultaneousWithExternalGesture(props.panGesture)
     .onEnd((event) => {
       runOnJS(_toogleSnapAnimate)({
