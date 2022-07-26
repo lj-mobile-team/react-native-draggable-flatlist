@@ -81,22 +81,6 @@ function RowItem<T>(props: Props<T>) {
     return keyToIndexRef.current.get(itemKey);
   });
 
-  const _onPanStateChange = (props: any) => {
-    const { nativeEvent } = props;
-
-    const index = getIndex();
-
-    if (index) {
-      if (
-        (nativeEvent.oldState === GestureState.ACTIVE &&
-          nativeEvent.state === GestureState.END) ||
-        nativeEvent.state === GestureState.FAILED
-      ) {
-        _toogleSnapAnimate({ isDelete: nativeEvent.translationY <= -200 });
-      }
-    }
-  };
-
   const _toogleSnapAnimate = useStableCallback(
     ({ isDelete }: { isDelete: Boolean }) => {
       const { deleteItem, itemProp, localization, screenHeight } = props;
@@ -177,12 +161,12 @@ function RowItem<T>(props: Props<T>) {
   });
 
   const itemPanGesture = Gesture.Pan()
-    .enabled(enabled)
-    .activeOffsetY([-50, 50])
+    .enabled( !!getIndex() && enabled )
+    .activeOffsetY([-1, 1])
     .simultaneousWithExternalGesture(props.panGesture)
     .onEnd((event) => {
       runOnJS(_toogleSnapAnimate)({
-        isDelete: event.translationY <= -200 && !!getIndex(),
+        isDelete: event.translationY <= -200,
       });
     })
     .onUpdate((event) => {
