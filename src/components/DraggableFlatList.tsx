@@ -40,7 +40,7 @@ import { useAutoScroll } from "../hooks/useAutoScroll";
 import { useStableCallback } from "../hooks/useStableCallback";
 import ScrollOffsetListener from "./ScrollOffsetListener";
 import { typedMemo } from "../utils";
-import {ScaleDecorator, ShadowDecorator} from "./CellDecorators";
+import { ScaleDecorator, ShadowDecorator } from "./CellDecorators";
 
 const { height, width } = Dimensions.get("screen");
 
@@ -134,33 +134,6 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
     }
   });
 
-  // let scale = new Animated.Value<number>(0);
-  // let lastTimingAnimation = "";
-
-  // const startTimingAnimation = useCallback(() => {
-  //   if (lastTimingAnimation !== "start") {
-  //     lastTimingAnimation = "start";
-  //     console.log('STARTING DRAG!!!');
-  //     Animated.timing(scale, {
-  //       duration: 500,
-  //       toValue: 1,
-  //       easing: Easing.bounce,
-  //     }).start();
-  //   }
-  // }, []);
-
-  // const endTimingAnimation = useCallback(() => {
-  //   if (lastTimingAnimation !== "end") {
-  //     lastTimingAnimation = "end";
-  //     console.log('ENDING DRAG!!!');
-  //     Animated.timing(scale, {
-  //       duration: 500,
-  //       toValue: 0,
-  //       easing: Easing.bounce,
-  //     }).start();
-  //   }
-  // }, []);
-
   const onContainerLayout = ({
     nativeEvent: { layout },
   }: LayoutChangeEvent) => {
@@ -209,28 +182,28 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
         localization,
       } = props;
 
- 
+
       return (
-           <ScaleDecorator activeScale={1.1}>
-             <ShadowDecorator>
-              <RowItem
-                item={item}
-                itemKey={key}
-                renderItem={props.renderItem}
-                drag={drag}
-                extraData={props.extraData}
-                horizontal={horizontal}
-                deleteItem={deleteItem}
-                localization={localization}
-                screenHeight={screenHeight}
-                itemProp={item}
-                panGesture={panGesture}
-                //@ts-ignore
-                activeIndex={activeIndexAnim}
-              />
-            </ShadowDecorator>
+        <ScaleDecorator activeScale={1.1}>
+          <ShadowDecorator>
+            <RowItem
+              item={item}
+              itemKey={key}
+              renderItem={props.renderItem}
+              drag={drag}
+              extraData={props.extraData}
+              horizontal={horizontal}
+              deleteItem={deleteItem}
+              localization={localization}
+              screenHeight={screenHeight}
+              itemProp={item}
+              panGesture={panGesture}
+              //@ts-ignore
+              activeIndex={activeIndexAnim}
+            />
+          </ShadowDecorator>
         </ScaleDecorator>
-       
+
       );
     },
     [props.renderItem, props.extraData, drag, keyExtractor]
@@ -291,13 +264,20 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
     })
     .onUpdate((evt) => {
       if (gestureDisabled.value) return;
-      panGestureState.value = evt.state;
-      const translation = horizontalAnim.value
-        ? evt.translationX
-        : evt.translationY;
-      touchTranslate.value = translation;
+      if ((autoScrollDistance.value + activeCellOffset.value + evt.translationX) < activeCellSize.value) {
+        return;
+      } else {
+        panGestureState.value = evt.state;
+
+        const translation = horizontalAnim.value
+          ? evt.translationX
+          : evt.translationY;
+        touchTranslate.value = translation;
+      }
+
     })
     .onEnd((evt) => {
+
       if (gestureDisabled.value) return;
       // Set touch val to current translate val
       isTouchActiveNative.value = false;
