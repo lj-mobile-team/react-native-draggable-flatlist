@@ -40,7 +40,7 @@ import { useAutoScroll } from "../hooks/useAutoScroll";
 import { useStableCallback } from "../hooks/useStableCallback";
 import ScrollOffsetListener from "./ScrollOffsetListener";
 import { typedMemo } from "../utils";
-import {ScaleDecorator} from "./CellDecorators";
+import {ScaleDecorator, ShadowDecorator} from "./CellDecorators";
 
 const { height, width } = Dimensions.get("screen");
 
@@ -211,23 +211,26 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
 
  
       return (
-        <ScaleDecorator activeScale={1.1}>
-          <RowItem
-            item={item}
-            itemKey={key}
-            renderItem={props.renderItem}
-            drag={drag}
-            extraData={props.extraData}
-            horizontal={horizontal}
-            deleteItem={deleteItem}
-            localization={localization}
-            screenHeight={screenHeight}
-            itemProp={item}
-            panGesture={panGesture}
-            //@ts-ignore
-            activeIndex={activeIndexAnim}
-          />
-       </ScaleDecorator>
+           <ScaleDecorator activeScale={1.1}>
+             <ShadowDecorator>
+              <RowItem
+                item={item}
+                itemKey={key}
+                renderItem={props.renderItem}
+                drag={drag}
+                extraData={props.extraData}
+                horizontal={horizontal}
+                deleteItem={deleteItem}
+                localization={localization}
+                screenHeight={screenHeight}
+                itemProp={item}
+                panGesture={panGesture}
+                //@ts-ignore
+                activeIndex={activeIndexAnim}
+              />
+            </ShadowDecorator>
+        </ScaleDecorator>
+       
       );
     },
     [props.renderItem, props.extraData, drag, keyExtractor]
