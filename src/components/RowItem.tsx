@@ -56,7 +56,7 @@ function RowItem<T>(props: Props<T>) {
 
   useEffect(() => {
     toggleEnabled([props.activeIndex.value]);
-  }, [props.activeIndex]);
+  }, [props.activeIndex.value]);
 
   const drag = useStableCallback(() => {
     const { drag, itemKey, debug } = propsRef.current;
