@@ -194,7 +194,7 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
               itemProp={item}
               panGesture={panGesture}
               //@ts-ignore
-              activeIndex={keyToIndexRef.current.get(activeKey)}
+              activeIndex={activeKey}
             />
           </ShadowDecorator>
         </ScaleDecorator>

@@ -55,8 +55,8 @@ function RowItem<T>(props: Props<T>) {
   const { keyToIndexRef } = useRefs();
 
   useEffect(() => {
-    toggleEnabled([props.activeIndex]);
-  }, [props.activeIndex]);
+    toggleEnabled([activeKey]);
+  }, [activeKey]);
 
   const drag = useStableCallback(() => {
     const { drag, itemKey, debug } = propsRef.current;
@@ -115,8 +115,8 @@ function RowItem<T>(props: Props<T>) {
     }
   );
 
-  const toggleEnabled = (args: readonly number[]) => {
-    if (args[0] > -1) {
+  const toggleEnabled = (args: readonly (string | null)[]) => {
+    if (args[0]) {
       setEnabled(false);
     } else {
       setEnabled(true);
