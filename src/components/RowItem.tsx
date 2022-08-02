@@ -38,7 +38,7 @@ type Props<T> = {
   localization?: any;
   screenHeight?: number;
   panGesture: PanGesture;
-  activeIndex: SharedValue<number>;
+  activeIndex: number;
 };
 
 function RowItem<T>(props: Props<T>) {
@@ -55,8 +55,8 @@ function RowItem<T>(props: Props<T>) {
   const { keyToIndexRef } = useRefs();
 
   useEffect(() => {
-    toggleEnabled([props.activeIndex.value]);
-  }, [props.activeIndex.value]);
+    toggleEnabled([props.activeIndex]);
+  }, [props.activeIndex]);
 
   const drag = useStableCallback(() => {
     const { drag, itemKey, debug } = propsRef.current;
@@ -161,7 +161,7 @@ function RowItem<T>(props: Props<T>) {
   });
 
   const itemPanGesture = Gesture.Pan()
-    .enabled( !!getIndex() && enabled )
+    .enabled(!!getIndex() && enabled)
     .activeOffsetY([-10, 10])
     .simultaneousWithExternalGesture(props.panGesture)
     .onEnd((event) => {

@@ -51,9 +51,9 @@ type RNGHFlatListProps<T> = Animated.AnimateProps<
   }
 >;
 
-const AnimatedFlatList = (Animated.createAnimatedComponent(
+const AnimatedFlatList = Animated.createAnimatedComponent(
   FlatList
-) as unknown) as <T>(props: RNGHFlatListProps<T>) => React.ReactElement;
+) as unknown as <T>(props: RNGHFlatListProps<T>) => React.ReactElement;
 
 function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
   const {
@@ -84,7 +84,8 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
   const {
     dragHitSlop = DEFAULT_PROPS.dragHitSlop,
     scrollEnabled = DEFAULT_PROPS.scrollEnabled,
-    activationDistance: activationDistanceProp = DEFAULT_PROPS.activationDistance,
+    activationDistance:
+      activationDistanceProp = DEFAULT_PROPS.activationDistance,
   } = props;
 
   const [activeKey, setActiveKey] = useState<string | null>(null);
@@ -174,14 +175,8 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
         keyToIndexRef.current.set(key, index);
       }
 
-      const {
-        renderItem,
-        horizontal,
-        deleteItem,
-        screenHeight,
-        localization,
-      } = props;
-
+      const { renderItem, horizontal, deleteItem, screenHeight, localization } =
+        props;
 
       return (
         <ScaleDecorator activeScale={1.1}>
@@ -199,11 +194,10 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
               itemProp={item}
               panGesture={panGesture}
               //@ts-ignore
-              activeIndex={activeIndexAnim}
+              activeIndex={keyToIndexRef.current.get(activeKey)}
             />
           </ShadowDecorator>
         </ScaleDecorator>
-
       );
     },
     [props.renderItem, props.extraData, drag, keyExtractor]
@@ -264,7 +258,10 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
     })
     .onUpdate((evt) => {
       if (gestureDisabled.value) return;
-      if ((autoScrollDistance.value + activeCellOffset.value + evt.translationX) < activeCellSize.value) {
+      if (
+        autoScrollDistance.value + activeCellOffset.value + evt.translationX <
+        activeCellSize.value
+      ) {
         return;
       } else {
         panGestureState.value = evt.state;
@@ -274,10 +271,8 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
           : evt.translationY;
         touchTranslate.value = translation;
       }
-
     })
     .onEnd((evt) => {
-
       if (gestureDisabled.value) return;
       // Set touch val to current translate val
       isTouchActiveNative.value = false;
