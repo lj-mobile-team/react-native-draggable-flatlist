@@ -24,6 +24,7 @@ export function useAutoScroll() {
     activeCellSize,
     hoverOffset,
     activeIndexAnim,
+    touchTranslate,
   } = useAnimatedValues();
 
   const hoverScreenOffset = useDerivedValue(() => {
@@ -85,7 +86,13 @@ export function useAutoScroll() {
 
     const cellIsActive = activeIndexAnim.value >= 0;
 
-    return hasScrolledToTarget && isAtEdge && !isEdgeDisabled && cellIsActive;
+    return (
+      hasScrolledToTarget &&
+      isAtEdge &&
+      !isEdgeDisabled &&
+      cellIsActive &&
+      touchTranslate.value
+    );
   }, []);
 
   function scrollToInternal(offset: number) {
