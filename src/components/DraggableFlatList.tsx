@@ -51,6 +51,11 @@ type RNGHFlatListProps<T> = Animated.AnimateProps<
   }
 >;
 
+type OnViewableItemsChangedCallback<T> = Exclude<
+  FlatListProps<T>["onViewableItemsChanged"],
+  undefined | null
+>;
+
 const AnimatedFlatList = Animated.createAnimatedComponent(
   FlatList
 ) as unknown as <T>(props: RNGHFlatListProps<T>) => React.ReactElement;
@@ -78,6 +83,8 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
     autoScrollDistance,
     panGestureState,
     isTouchActiveNative,
+    viewableIndexMin,
+    viewableIndexMax,
     disabled,
   } = useAnimatedValues();
 
@@ -103,17 +110,6 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
       keyToIndexRef.current.set(key, i);
     });
   }, [props.data, keyExtractor, keyToIndexRef]);
-
-  // Reset hover state whenever data changes
-  useMemo(() => {
-    requestAnimationFrame(() => {
-      activeIndexAnim.value = -1;
-      spacerIndexAnim.value = -1;
-      touchTranslate.value = 0;
-      activeCellSize.value = -1;
-      activeCellOffset.value = -1;
-    });
-  }, [props.data]);
 
   const drag = useStableCallback((activeKey: string) => {
     if (disabled.value) return;
@@ -210,22 +206,26 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
   const onDragEnd = useStableCallback(
     ({ from, to }: { from: number; to: number }) => {
       const { onDragEnd, data } = props;
-      if (onDragEnd) {
-        const newData = [...data];
-        if (from !== to) {
-          newData.splice(from, 1);
-          newData.splice(to, 0, data[from]);
-        }
-        onDragEnd({ from, to, data: newData });
-        if (isWeb) {
-          // prevent flicker
-          setActiveKey(null);
-        } else {
-          requestAnimationFrame(() => {
-            setActiveKey(null);
-          });
-        }
+
+      const newData = [...data];
+      if (from !== to) {
+        newData.splice(from, 1);
+        newData.splice(to, 0, data[from]);
       }
+
+      const reset = () => {
+        activeIndexAnim.value = -1;
+        spacerIndexAnim.value = -1;
+        touchTranslate.value = 0;
+        activeCellSize.value = -1;
+        activeCellOffset.value = -1;
+        setActiveKey(null);
+      };
+
+      if (isWeb) reset();
+      else setTimeout(reset);
+
+      onDragEnd?.({ from, to, data: newData });
     }
   );
 
@@ -308,7 +308,7 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
       runOnJS(onContainerTouchEnd)();
     });
 
-  if (props.hitSlop) panGesture.hitSlop(props.hitSlop);
+  if (dragHitSlop) panGesture.hitSlop(dragHitSlop);
   if (activationDistanceProp) {
     const activeOffset = [-activationDistanceProp, activationDistanceProp];
     if (props.horizontal) {
@@ -336,6 +336,21 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
 
   useAutoScroll();
 
+  const onViewableItemsChanged = useStableCallback<
+    OnViewableItemsChangedCallback<T>
+  >((info) => {
+    const viewableIndices = info.viewableItems
+      .filter((item) => item.isViewable)
+      .map((item) => item.index)
+      .filter((index): index is number => typeof index === "number");
+
+    const min = Math.min(...viewableIndices);
+    const max = Math.max(...viewableIndices);
+    viewableIndexMin.value = min;
+    viewableIndexMax.value = max;
+    props.onViewableItemsChanged?.(info);
+  });
+
   return (
     <DraggableFlatListProvider
       activeKey={activeKey}
@@ -354,6 +369,7 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
           <AnimatedFlatList
             {...props}
             data={props.data}
+            onViewableItemsChanged={onViewableItemsChanged}
             CellRendererComponent={CellRendererComponent}
             ref={flatlistRef}
             onContentSizeChange={onListContentSizeChange}

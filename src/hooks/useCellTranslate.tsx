@@ -4,7 +4,7 @@ import { useDraggableFlatListContext } from "../context/draggableFlatListContext
 import { useRefs } from "../context/refContext";
 
 type Params = {
-  cellIndex: Animated.SharedValue<number>;
+  cellIndex: number;
   cellSize: Animated.SharedValue<number>;
   cellOffset: Animated.SharedValue<number>;
 };
@@ -17,6 +17,8 @@ export function useCellTranslate({ cellIndex, cellSize, cellOffset }: Params) {
     spacerIndexAnim,
     placeholderOffset,
     hoverAnim,
+    viewableIndexMin,
+    viewableIndexMax,
   } = useAnimatedValues();
 
   const { activeKey } = useDraggableFlatListContext();
@@ -24,11 +26,18 @@ export function useCellTranslate({ cellIndex, cellSize, cellOffset }: Params) {
   const { animationConfigRef } = useRefs();
 
   const translate = useDerivedValue(() => {
-    if (!activeKey || activeIndexAnim.value < 0) return 0;
+    const isActiveCell = cellIndex === activeIndexAnim.value;
+    const isOutsideViewableRange =
+      !isActiveCell &&
+      (cellIndex < viewableIndexMin.value ||
+        cellIndex > viewableIndexMax.value);
+    if (!activeKey || activeIndexAnim.value < 0 || isOutsideViewableRange) {
+      return 0;
+    }
 
     // Determining spacer index is hard to visualize. See diagram: https://i.imgur.com/jRPf5t3.jpg
-    const isBeforeActive = cellIndex.value < activeIndexAnim.value;
-    const isAfterActive = cellIndex.value > activeIndexAnim.value;
+    const isBeforeActive = cellIndex < activeIndexAnim.value;
+    const isAfterActive = cellIndex > activeIndexAnim.value;
 
     const hoverPlusActiveSize = hoverOffset.value + activeCellSize.value;
     const offsetPlusHalfSize = cellOffset.value + cellSize.value / 2;
@@ -41,13 +50,13 @@ export function useCellTranslate({ cellIndex, cellSize, cellOffset }: Params) {
         hoverPlusActiveSize < offsetPlusHalfSize
       ) {
         // bottom edge of active cell overlaps top half of current cell
-        result = cellIndex.value - 1;
+        result = cellIndex - 1;
       } else if (
         hoverPlusActiveSize >= offsetPlusHalfSize &&
         hoverPlusActiveSize < offsetPlusSize
       ) {
         // bottom edge of active cell overlaps bottom half of current cell
-        result = cellIndex.value;
+        result = cellIndex;
       }
     } else if (isBeforeActive) {
       if (
@@ -55,13 +64,13 @@ export function useCellTranslate({ cellIndex, cellSize, cellOffset }: Params) {
         hoverOffset.value >= offsetPlusHalfSize
       ) {
         // top edge of active cell overlaps bottom half of current cell
-        result = cellIndex.value + 1;
+        result = cellIndex + 1;
       } else if (
         hoverOffset.value >= cellOffset.value &&
         hoverOffset.value < offsetPlusHalfSize
       ) {
         // top edge of active cell overlaps top half of current cell
-        result = cellIndex.value;
+        result = cellIndex;
       }
     }
 
@@ -69,7 +78,7 @@ export function useCellTranslate({ cellIndex, cellSize, cellOffset }: Params) {
       spacerIndexAnim.value = result || 1;
     }
 
-    if (spacerIndexAnim.value === cellIndex.value) {
+    if (spacerIndexAnim.value === cellIndex) {
       const newPlaceholderOffset = isAfterActive
         ? cellSize.value + (cellOffset.value - activeCellSize.value)
         : cellOffset.value;
@@ -80,7 +89,7 @@ export function useCellTranslate({ cellIndex, cellSize, cellOffset }: Params) {
     if (activeIndexAnim.value < 0) return 0;
 
     // Active cell follows touch
-    if (cellIndex.value === activeIndexAnim.value) {
+    if (isActiveCell) {
       return hoverAnim.value;
     }
 
@@ -88,15 +97,15 @@ export function useCellTranslate({ cellIndex, cellSize, cellOffset }: Params) {
     // Translate cell up if it is after the active index and active cell has passed it.
 
     const shouldTranslate = isAfterActive
-      ? cellIndex.value <= spacerIndexAnim.value
-      : cellIndex.value >= spacerIndexAnim.value;
+      ? cellIndex <= spacerIndexAnim.value
+      : cellIndex >= spacerIndexAnim.value;
 
     const translationAmt = shouldTranslate
       ? activeCellSize.value * (isAfterActive ? -1 : 1)
       : 0;
 
     return withSpring(translationAmt, animationConfigRef.current);
-  }, [activeKey]);
+  }, [activeKey, cellIndex]);
 
   return translate;
 }
