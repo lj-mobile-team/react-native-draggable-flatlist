@@ -61,6 +61,7 @@ function RowItem<T>(props: Props<T>) {
   const drag = useStableCallback(() => {
     const { drag, itemKey, debug } = propsRef.current;
     if (activeKeyRef.current) {
+      return;
       // already dragging an item, noop
       if (debug)
         console.log(
