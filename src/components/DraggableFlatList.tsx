@@ -236,8 +236,12 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
     },
     (cur, prev) => {
       if (cur !== prev && !cur) {
-        const hasMoved = !!touchTranslate.value;
-        if (!hasMoved && activeIndexAnim.value >= 0 && !disabled.value) {
+        const hasMoved = !!(Math.abs(touchTranslate.value) < 10);
+        if (
+          (!hasMoved || panGestureState.value === 2) &&
+          activeIndexAnim.value >= 0 &&
+          !disabled.value
+        ) {
           runOnJS(onDragEnd)({
             from: activeIndexAnim.value,
             to: spacerIndexAnim.value,
