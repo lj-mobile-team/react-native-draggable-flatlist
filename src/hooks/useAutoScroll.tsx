@@ -43,7 +43,7 @@ export function useAutoScroll() {
   }, []);
 
   const distToTopEdge = useDerivedValue(() => {
-    return Math.max(activeCellSize.value, hoverScreenOffset.value);
+    return Math.max(0, hoverScreenOffset.value);
   }, []);
 
   const distToBottomEdge = useDerivedValue(() => {
