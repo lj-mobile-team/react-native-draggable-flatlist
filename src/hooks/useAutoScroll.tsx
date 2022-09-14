@@ -110,13 +110,15 @@ export function useAutoScroll() {
     const speedPct = 1 - distFromEdge / autoscrollThreshold!;
     const offset = speedPct * autoscrollSpeed;
     const targetOffset = isAtTopEdge.value
-      ? Math.max(0, scrollOffset.value - offset)
+      ? Math.max(activeCellSize.value, scrollOffset.value - offset)
       : Math.min(
           scrollOffset.value + offset,
           scrollViewSize.value - containerSize.value
         );
 
     scrollTarget.value = targetOffset;
+
+    console.log(targetOffset, "!!!");
     // Reanimated scrollTo is crashing on android. use 'regular' scrollTo until figured out.
     // scrollTo(scrollViewRef, targetX, targetY, true);
     runOnJS(scrollToInternal)(targetOffset);
