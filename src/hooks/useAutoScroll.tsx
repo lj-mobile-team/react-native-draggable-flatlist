@@ -118,7 +118,6 @@ export function useAutoScroll() {
 
     scrollTarget.value = targetOffset;
 
-    console.log(targetOffset, "!!!");
     // Reanimated scrollTo is crashing on android. use 'regular' scrollTo until figured out.
     // scrollTo(scrollViewRef, targetX, targetY, true);
     runOnJS(scrollToInternal)(targetOffset);
