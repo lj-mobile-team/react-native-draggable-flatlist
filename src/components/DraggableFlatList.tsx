@@ -1,12 +1,15 @@
-import React, { useCallback, useLayoutEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   ListRenderItem,
   FlatListProps,
   LayoutChangeEvent,
-  View,
-  Animated as RNAnimated,
-  Easing as RNEasing,
-  Alert,
   Dimensions,
 } from "react-native";
 import {
@@ -20,10 +23,6 @@ import Animated, {
   useAnimatedScrollHandler,
   useSharedValue,
   withSpring,
-  interpolateNode,
-  Extrapolate,
-  EasingNode as Easing,
-  multiply,
 } from "react-native-reanimated";
 import CellRendererComponent from "./CellRendererComponent";
 import { DEFAULT_PROPS, isWeb } from "../constants";
@@ -88,6 +87,15 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
     disabled,
   } = useAnimatedValues();
 
+  const reset = useStableCallback(() => {
+    activeIndexAnim.value = -1;
+    spacerIndexAnim.value = -1;
+    touchTranslate.value = 0;
+    activeCellSize.value = -1;
+    activeCellOffset.value = -1;
+    setActiveKey(null);
+  });
+
   const {
     dragHitSlop = DEFAULT_PROPS.dragHitSlop,
     scrollEnabled = DEFAULT_PROPS.scrollEnabled,
@@ -95,7 +103,10 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
       activationDistanceProp = DEFAULT_PROPS.activationDistance,
   } = props;
 
-  const [activeKey, setActiveKey] = useState<string | null>(null);
+  let [activeKey, setActiveKey] = useState<string | null>(null);
+  // const [layoutAnimationDisabled, setLayoutAnimationDisabled] = useState(
+  //   !propsRef.current.enableLayoutAnimationExperimental
+  // );
 
   const keyExtractor = useStableCallback((item: T, index: number) => {
     if (!props.keyExtractor) {
@@ -103,6 +114,29 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
     }
     return props.keyExtractor(item, index);
   });
+
+  const dataRef = useRef(props.data);
+  const dataHasChanged =
+    dataRef.current.map(keyExtractor).join("") !==
+    props.data.map(keyExtractor).join("");
+  dataRef.current = props.data;
+  if (dataHasChanged) {
+    // When data changes make sure `activeKey` is nulled out in the same render pass
+    activeKey = null;
+  }
+
+  useEffect(() => {
+    // if (!propsRef.current.enableLayoutAnimationExperimental) return;
+    if (activeKey) {
+      // setLayoutAnimationDisabled(true);
+    } else {
+      // setTimeout result of trial-and-error to determine how long to wait before
+      // re-enabling layout animations so that a drag reorder does not trigger it.
+      setTimeout(() => {
+        // setLayoutAnimationDisabled(false);
+      }, 100);
+    }
+  }, [activeKey]);
 
   useLayoutEffect(() => {
     props.data.forEach((d, i) => {
@@ -119,8 +153,6 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
       activeCellOffset.value = cellData.measurements.offset;
       activeCellSize.value = cellData.measurements.size;
     }
-
-    // startTimingAnimation();
 
     const { onDragBegin } = propsRef.current;
     if (index !== undefined) {
@@ -152,7 +184,6 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
   };
 
   const onContainerTouchEnd = () => {
-    // endTimingAnimation();
     isTouchActiveNative.value = false;
   };
 
@@ -170,10 +201,8 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
       if (index !== keyToIndexRef.current.get(key)) {
         keyToIndexRef.current.set(key, index);
       }
-
       const { renderItem, horizontal, deleteItem, screenHeight, localization } =
         props;
-
       return (
         <ScaleDecorator activeScale={1.1}>
           <ShadowDecorator>
@@ -213,19 +242,8 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
         newData.splice(to, 0, data[from]);
       }
 
-      const reset = () => {
-        activeIndexAnim.value = -1;
-        spacerIndexAnim.value = -1;
-        touchTranslate.value = 0;
-        activeCellSize.value = -1;
-        activeCellOffset.value = -1;
-        setActiveKey(null);
-      };
-
-      if (isWeb) reset();
-      else setTimeout(reset);
-
       onDragEnd?.({ from, to, data: newData });
+      reset();
     }
   );
 
@@ -286,6 +304,7 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
 
       touchTranslate.value = translation + autoScrollDistance.value;
       panGestureState.value = evt.state;
+
       // Only call onDragEnd if actually dragging a cell
       if (activeIndexAnim.value === -1 || disabled.value) return;
       disabled.value = true;
@@ -382,7 +401,7 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
             extraData={extraData}
             keyExtractor={keyExtractor}
             onScroll={scrollHandler}
-            scrollEventThrottle={props.scrollEventThrottle}
+            scrollEventThrottle={16}
             simultaneousHandlers={props.simultaneousHandlers}
             removeClippedSubviews={false}
           />
