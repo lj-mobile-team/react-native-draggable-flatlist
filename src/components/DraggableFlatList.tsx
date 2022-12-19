@@ -204,8 +204,8 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
       const { renderItem, horizontal, deleteItem, screenHeight, localization } =
         props;
       return (
-        <ScaleDecorator activeScale={1.1}>
-          <ShadowDecorator>
+        // <ScaleDecorator activeScale={1.1}>
+        //   <ShadowDecorator>
             <RowItem
               item={item}
               itemKey={key}
@@ -221,8 +221,8 @@ function DraggableFlatListInner<T>(props: DraggableFlatListProps<T>) {
               //@ts-ignore
               activeIndex={activeKey}
             />
-          </ShadowDecorator>
-        </ScaleDecorator>
+        //   </ShadowDecorator>
+        // </ScaleDecorator>
       );
     },
     [props.renderItem, props.extraData, drag, keyExtractor]

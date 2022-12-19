@@ -24,6 +24,8 @@ export function useOnCellActiveAnimation(
 
   const onActiveAnim = useDerivedValue(() => {
     const toVal = isActive && isTouchActiveNative.value ? 1 : 0;
+
+    return toVal;
     return withSpring(toVal, {
       ...DEFAULT_ANIMATION_CONFIG,
       ...animationConfigRef.current,

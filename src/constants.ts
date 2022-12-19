@@ -19,8 +19,8 @@ export const DEFAULT_ANIMATION_CONFIG: WithSpringConfig = {
 };
 
 export const DEFAULT_PROPS = {
-  autoscrollThreshold: 30,
-  autoscrollSpeed: 100,
+  autoscrollThreshold: 0,//30,
+  autoscrollSpeed: 0,//100,
   animationConfig: DEFAULT_ANIMATION_CONFIG,
   scrollEnabled: true,
   dragHitSlop: 0 as PanGestureHandlerProperties["hitSlop"],
