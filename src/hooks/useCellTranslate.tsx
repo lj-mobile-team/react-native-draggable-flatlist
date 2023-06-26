@@ -35,6 +35,8 @@ export function useCellTranslate({ cellIndex, cellSize, cellOffset }: Params) {
       return 0;
     }
 
+    return 0; // Disable drag
+
     // Determining spacer index is hard to visualize. See diagram: https://i.imgur.com/jRPf5t3.jpg
     const isBeforeActive = cellIndex < activeIndexAnim.value;
     const isAfterActive = cellIndex > activeIndexAnim.value;
